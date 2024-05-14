@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "passwordChangedAt" SET DEFAULT CURRENT_TIMESTAMP;
