@@ -40,7 +40,7 @@ model Transaction {
   user     User       @relation(fields: [userId], references: [id] ,onDelete:Cascade ,onUpdate: Cascade)
   userId   Int
   categories Category[]
-  transactionType  Type @default(credit)
+  transactionType  Type  @default(debit)
 }
 
 model Category {
@@ -48,15 +48,16 @@ model Category {
   categories Option @unique @default(salary)
   posts Transaction[]
 }
+enum Type{
+  credit
+  debit
+}
 
 enum Role {
   USER
   ADMIN
 }
-enum Type{
-  credit
-  debit
-}
+
 enum Option{
   salary
   grocery

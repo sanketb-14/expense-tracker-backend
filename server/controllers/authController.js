@@ -57,7 +57,7 @@ export const signup = catchAsync(async (req, res, next) => {
   });
 
   if (user) {
-    return next(new AppError("User already exists, please login", 4 - 3));
+    return next(new AppError("User already exists, please login", 403));
   }
   const newUser = {
     username,

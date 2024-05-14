@@ -56,11 +56,28 @@ export const myAccount = catchAsync(async (req,res,next)=>{
     if(!myTransaction){
         return next(new AppError("No transaction found",404))
     }
+    // const balance = await prisma.transaction.findMany({
+        
+    // })
+    const balance = myTransaction.reduce((acc, item) =>{
+        let updatedBalance = acc
+        if(item.transactionType === 'debit'){
+
+            updatedBalance -= Number(item.amount)
+        }
+        else{
+            updatedBalance += Number(item.amount)
+        }
+        return Number(updatedBalance.toFixed(2))
+    },0)
     return res.status(200).json({
         status:"success",
+        balance,
         data:{
             myTransaction
         }
     })
 
 })
+
+
