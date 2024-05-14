@@ -4,7 +4,8 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon server.js"
+    "dev": "cd .. && cd client && npm run dev",
+    "start": "concurrently \"nodemon server.js\"  \"npm run dev\""
   },
   "keywords": [],
   "author": "",
