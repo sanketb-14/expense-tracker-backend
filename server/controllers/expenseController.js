@@ -95,3 +95,13 @@ export const getTransactionByCategories = catchAsync(async (req, res, next) => {
     data: transactions,
   })
 })
+
+export const getAllCategories = catchAsync(async(req, res, next) => {
+  const categories = await prisma.category.findMany({
+
+  })
+  return res.status(200).json({
+    status:"success",
+    data:categories
+  })
+})

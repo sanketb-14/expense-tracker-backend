@@ -46,6 +46,7 @@ model Transaction {
 model Category {
   id    Int    @id @default(autoincrement())
   categories Option @unique @default(salary)
+  logo String? 
   posts Transaction[]
 }
 enum Type{

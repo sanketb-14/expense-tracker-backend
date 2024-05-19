@@ -6,6 +6,7 @@ import globalErrorHandler from './controllers/errorController.js'
 import AppError from "./utils/appError.js";
 import helmet from 'helmet'
 import xss from 'xss-clean'
+import cors from 'cors'
 import 'dotenv/config'
 
 const app = express();
@@ -14,6 +15,7 @@ const app = express();
 
 //Set security HTTP Headers
 app.use(helmet())
+app.use(cors())
 
 // Prevent XSS attacks
 
@@ -22,7 +24,7 @@ app.use(xss())
 // Limit requests from same API
 
 const limiter = rateLimit({
-  max:100,
+  max:1000,
   windowMs: 60 * 60 * 1000,
   message: 'Too many requests from this IP, please try again in an hour!'
 })
