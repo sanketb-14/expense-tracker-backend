@@ -1,41 +1,14 @@
 "use client";
-import { useState } from "react";
+
 import { useAuth } from "../contexts/UsersContext";
 import { useTrans } from "../contexts/TransactionsContext";
-import {useRouter} from "next/navigation"
+import { useRouter } from "next/navigation";
 import Loader from "./Loader";
 
-const initialState = {
-  title: "",
-  descriptions: "",
-  amount: 0,
-  categories: { connect: [{ id: 0 }] },
-  transactionType: "",
-};
-
-const AddTransaction = () => {
+const AddTransaction = ({ handleChange, handleFormSubmit, expense }) => {
   const { category } = useAuth();
-  const { addExpense,isLoading } = useTrans();
-  const [expense, setExpense] = useState(initialState);
-  const router = useRouter()
 
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setExpense({...expense,  [name]: value });
-  }
-
-  async function handleFormSubmit(e) {
-    e.preventDefault()
-    
-    await addExpense(expense);
-    
-    
-    setExpense(initialState);
-    router.push('/dashboard')
-  }
-  if(isLoading){
-    return <Loader/>
-  }
+  
 
   return (
     <div className="card mt-2 shrink-0 w-full shadow-2xl bg-base-100">

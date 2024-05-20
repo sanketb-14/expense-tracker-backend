@@ -20,17 +20,14 @@ const Dashboard = () => {
   return (
     <main className="">
       <Navbar />
-      <div className="flex w-full">
-        <div className="grid z-20">
-          <Sidebar />
-        </div>
-        <div className="divider divider-horizontal"></div>
-        <div className="grid h-auto flex-grow card bg-base-300 rounded-box w-full  place-items-center z-10">
-          <TransactionTable />
-        </div>
-      </div>
+      <div className="flex flex-col w-full">
+  <div className="grid card  rounded-box place-items-center"><Sidebar /></div> 
+  <div className="divider"></div> 
+  <div className="grid shadow-xl card rounded-box place-items-center"> <TransactionTable /></div>
+</div>
     </main>
   );
 };
 
 export default Dashboard;
+

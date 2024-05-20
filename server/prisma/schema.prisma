@@ -40,12 +40,12 @@ model Transaction {
   user     User       @relation(fields: [userId], references: [id] ,onDelete:Cascade ,onUpdate: Cascade)
   userId   Int
   categories Category[]
-  transactionType  Type  @default(debit)
+  transactionType  Type 
 }
 
 model Category {
   id    Int    @id @default(autoincrement())
-  categories Option @unique @default(salary)
+  categories Option @unique
   logo String? 
   posts Transaction[]
 }

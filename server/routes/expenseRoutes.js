@@ -11,5 +11,6 @@ router.route('/addExpense').post(addExpense)
 router.route('/myAccount').get(myAccount)
 router.route('/getAllCategories').get(getAllCategories)
 router.route('/editExpense/:transactionId').patch(editTransaction).delete(deleteTransaction)
+
 router.route('/myAccount/:categories').get(getTransactionByCategories)
 export default router

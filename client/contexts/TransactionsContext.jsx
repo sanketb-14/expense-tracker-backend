@@ -29,7 +29,7 @@ function reducer(state, action) {
     case "getBalance":
       return {
         ...state,
-        balance: action.payload,
+        balance:  action.payload,
         isLoading: false,
       };
     case "rejected":
@@ -44,18 +44,19 @@ function reducer(state, action) {
 }
 
 function TransactionProvider({ children }) {
-  const [
-    { transactions, getTransactions, isLoading, balance, error },
-    dispatch,
-  ] = useReducer(reducer, initialState);
+  const [{ transactions, isLoading, balance, error }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
   const { isLoggedIn } = useAuth();
 
   async function fetchTransactions() {
     try {
       dispatch({ type: "isLoading" });
       const res = await axiosInstance.get("/api/v1/accounts/myAccount");
-      dispatch({ type: "isLoading", payload: false });
-      
+
+      console.log(res);
+
       dispatch({
         type: "getTransactions",
         payload: res.data.data.myTransaction,
@@ -82,31 +83,90 @@ function TransactionProvider({ children }) {
         "api/v1/accounts/addExpense",
         expenseData
       );
-      console.log(res.data.data.newExpense);
-     
-      
-      if (res.data.success) {
+
+      if (res.data.status === "success") {
         const newExpense = res.data.data.newExpense;
-        const updatedTransactions = [...transaction, newExpense];
+        console.log(newExpense);
+        const updatedTransactions = [...transactions, newExpense];
+        const newBalance =
+          newExpense.transactionType === "debit"
+            ? balance - parseInt(newExpense.amount)
+            : balance + parseInt(newExpense.amount);
         dispatch({ type: "getTransactions", payload: updatedTransactions });
+        console.log(balance);
         
+        dispatch({ type: "getBalance", payload: newBalance });
       }
     } catch (error) {
       dispatch({
         type: "rejected",
         payload: error.response.data,
       });
-      
     }
-    finally {
-      dispatch({ type: "isLoading", payload: false }); // Set isLoading to false regardless of success or failure
+  }
+  async function deleteExpense(id) {
+    try {
+      dispatch({ type: "isLoading" });
+      const res = await axiosInstance.delete(
+        `/api/v1/accounts/editExpense/${id}`
+      );
+
+      if (res.data.status === "success") {
+        const deletedTransaction = transactions.find(
+          (transaction) => transaction.id === id
+        );
+        const newBalance = balance + Number(deletedTransaction.amount);
+
+        const updatedTransactions = transactions.filter(
+          (transaction) => transaction.id !== id
+        );
+
+        dispatch({ type: "getTransactions", payload: updatedTransactions });
+
+        dispatch({ type: "getBalance", payload: newBalance });
+      }
+    } catch (error) {
+      dispatch({
+        type: "rejected",
+        payload: error.response.data,
+      });
     }
   }
 
+  async function editExpense(id, updatedTransaction) {
+    try {
+      dispatch({ type: "isLoading" });
+      const res = await axiosInstance.patch(
+        `/api/v1/accounts/editExpense/${id}`,
+        updatedTransaction
+      );
+
+      console.log(res);
+      if (res.data.status === "success") {
+        const updatedTransactions = transactions.map((transaction) =>
+          transaction.id === id ? res.data.data.updatedTransaction : transaction
+        );
+        dispatch({ type: "getTransactions", payload: updatedTransactions });
+      }
+    } catch (error) {
+      dispatch({
+        type: "rejected",
+        payload: error.response.data,
+      });
+    }
+  }
 
   return (
     <TransactionContext.Provider
-      value={{ isLoading, transactions, balance, error,addExpense }}
+      value={{
+        isLoading,
+        transactions,
+        deleteExpense,
+        balance,
+        error,
+        addExpense,
+        editExpense,
+      }}
     >
       {children}
     </TransactionContext.Provider>

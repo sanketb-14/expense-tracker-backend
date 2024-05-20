@@ -46,7 +46,7 @@ function reducer(state, action) {
         user: {},
         transaction: [],
         token: "",
-        isLoading:false
+        isLoading: false,
       };
     case "getUserData":
       return {
@@ -60,7 +60,6 @@ function reducer(state, action) {
         ...state,
         isLoading: false,
         error: action.payload,
-
       };
     case "getToken":
       return {
@@ -87,7 +86,7 @@ function reducer(state, action) {
       return {
         ...state,
         category: action.payload,
-          isLoading: false,
+        isLoading: false,
       };
     case "getBalance":
       return {
@@ -95,14 +94,14 @@ function reducer(state, action) {
         balance: action.payload,
         isLoading: false,
       };
-      case "isAuthenticated":
-        return {
-         ...state,
-          isAuthenticated: true,
-          isLoggedIn: true,
-          isLoading: false,
-        };
-    
+    case "isAuthenticated":
+      return {
+        ...state,
+        isAuthenticated: true,
+        isLoggedIn: true,
+        isLoading: false,
+      };
+
     default:
       return "unknown action type";
   }
@@ -134,16 +133,14 @@ function UsersProvider({ children }) {
     }
   }, []);
 
- 
-
   useEffect(() => {
     async function fetchCategory() {
       try {
-        dispatch({type:"isLoading"})
+        dispatch({ type: "isLoading" });
         const res = await axiosInstance.get(
           "/api/v1/accounts/getAllCategories"
         );
-        dispatch({ type: "isLoading", payload: false }); 
+        
         dispatch({
           type: "getCategory",
           payload: res.data.data,
@@ -201,14 +198,13 @@ function UsersProvider({ children }) {
 
   async function logout() {
     try {
-      dispatch({type:"isLoading"})
+      dispatch({ type: "isLoading" });
       delete axiosInstance.defaults.headers.common["Authorization"];
       await axiosInstance.get("/api/v1/users/logout");
-      dispatch({type:"isLoading", payload:false})
+      dispatch({ type: "isLoading", payload: false });
       dispatch({ type: "isLoggedOut" });
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-     
     } catch (error) {
       dispatch({
         type: "rejected",
@@ -216,7 +212,7 @@ function UsersProvider({ children }) {
       });
     }
   }
- 
+
   return (
     <UsersContext.Provider
       value={{
@@ -231,7 +227,6 @@ function UsersProvider({ children }) {
         logout,
         category,
         balance,
-      
       }}
     >
       {children}
