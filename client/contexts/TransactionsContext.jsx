@@ -3,6 +3,8 @@ import { createContext, useContext, useReducer, useEffect } from "react";
 import axiosInstance from "./helper/axiosInstance";
 import axios from "axios";
 import { useAuth } from "./UsersContext";
+import Razorpay from "razorpay";
+import main from "../public/assets/main_manage.svg";
 
 const TransactionContext = createContext();
 
@@ -11,6 +13,11 @@ const initialState = {
   transactions: [],
   error: {},
   balance: 0,
+  order: {
+    orderId: "",
+    paymentId: "",
+    signature: "",
+  },
 };
 
 function reducer(state, action) {
@@ -29,13 +36,19 @@ function reducer(state, action) {
     case "getBalance":
       return {
         ...state,
-        balance:  action.payload,
+        balance: action.payload,
         isLoading: false,
       };
     case "rejected":
       return {
         ...state,
         error: action.payload,
+        isLoading: false,
+      };
+    case "setOrder":
+      return {
+        ...state,
+        order: action.payload,
         isLoading: false,
       };
     default:
@@ -48,7 +61,7 @@ function TransactionProvider({ children }) {
     reducer,
     initialState
   );
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, setPremium } = useAuth();
 
   async function fetchTransactions() {
     try {
@@ -94,7 +107,7 @@ function TransactionProvider({ children }) {
             : balance + parseInt(newExpense.amount);
         dispatch({ type: "getTransactions", payload: updatedTransactions });
         console.log(balance);
-        
+
         dispatch({ type: "getBalance", payload: newBalance });
       }
     } catch (error) {
@@ -156,6 +169,107 @@ function TransactionProvider({ children }) {
     }
   }
 
+  async function getTransactionsByCategories(categories) {
+    try {
+      dispatch({ type: "isLoading" });
+      const res = await axiosInstance.get(
+        `/api/v1/accounts/transactions/${categories}`
+      );
+      if (res.data.status === "success") {
+        dispatch({
+          type: "getTransactions",
+          payload: res.data.data,
+        });
+      }
+    } catch (err) {
+      dispatch({
+        type: "rejected",
+        payload: error.response.data,
+      });
+    }
+  }
+
+  const initPayment = (data) => {
+    if (!window.Razorpay) {
+      console.error("Razorpay script is not loaded");
+      return;
+    }
+    const options = {
+      key: "rzp_test_eMwKYTzL8DP6sN",
+      amount: 100,
+      currency: data.currency,
+      name: "premium member",
+      description: "Test Transaction",
+      image: { main },
+      order_id: data.id,
+      handler: async (response) => {
+        try {
+          const { data } = await axiosInstance.post(
+            "/api/v1/accounts/verify",
+            response
+          );
+          console.log(data);
+          if (data.status === "success") {
+            await setPremium(data); // Update client-side state
+          } else {
+            console.error("Payment verification failed:", data.errormessage);
+            alert(data.errormessage);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      },
+      theme: {
+        color: "#3399cc",
+      },
+    };
+    const rzp1 = new window.Razorpay(options);
+    rzp1.open();
+  };
+
+  async function razorCheckout() {
+    try {
+      const orderUrl = "/api/v1/accounts/checkout";
+      const { data } = await axiosInstance.post(orderUrl, { amount: 100 });
+      const paymentStatus = initPayment(data.data);
+      console.log(paymentStatus);
+    } catch (error) {}
+    console.log(error);
+  }
+
+  async function generatePDF(transactions) {
+    try {
+      dispatch({ type: "isLoading" });
+      const res = await axiosInstance.post(`/api/v1/accounts/generatePDF`, {
+        transactions
+      },  { responseType: 'json' });
+      if (res.data.status === "success") {
+        const pdfBase64 = res.data.data;
+        const byteCharacters = atob(pdfBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+  
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+  
+        const byteArray = new Uint8Array(byteNumbers);
+        const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+  
+
+        // Open the PDF file in a new tab or window
+        window.open(pdfUrl);
+      } else {
+        console.error("Failed to generate PDF");
+      }
+    } catch (error) {
+      dispatch({
+        type: "rejected",
+        payload: error.response.data,
+      });
+    }
+  }
+
   return (
     <TransactionContext.Provider
       value={{
@@ -166,6 +280,9 @@ function TransactionProvider({ children }) {
         error,
         addExpense,
         editExpense,
+        getTransactionsByCategories,
+        razorCheckout,
+        generatePDF,
       }}
     >
       {children}

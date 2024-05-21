@@ -16,6 +16,7 @@ const initialState = {
   transaction: [],
   category: [],
   balance: 0,
+  premium:false
 };
 
 function reducer(state, action) {
@@ -101,6 +102,12 @@ function reducer(state, action) {
         isLoggedIn: true,
         isLoading: false,
       };
+    case "isPremium":
+      return{
+        ...state,
+        premium:true,
+        isLoading:false
+      }  
 
     default:
       return "unknown action type";
@@ -119,7 +126,8 @@ function UsersProvider({ children }) {
       isAuthenticated,
       category,
       getBalance,
-      balance,
+      balance,isPremium,
+    
     },
     dispatch,
   ] = useReducer(reducer, initialState);
@@ -212,6 +220,21 @@ function UsersProvider({ children }) {
       });
     }
   }
+  async function setPremium(data){
+    try{
+      dispatch({type:"isLoading"})
+      if(data.status === "success"){
+        dispatch({type:"isPremium"})
+      }
+     
+     
+      
+    }
+    catch(Error){
+      dispatch({type:"rejected",payload:error.response.data})
+    }
+    
+  }
 
   return (
     <UsersContext.Provider
@@ -227,6 +250,8 @@ function UsersProvider({ children }) {
         logout,
         category,
         balance,
+        setPremium,
+        
       }}
     >
       {children}

@@ -1,5 +1,6 @@
 import {Router} from 'express' ;
 import {signup,login,logout,protect,restrictTo, forgotPassword, resetPassword} from '../controllers/authController.js'
+import multer from 'multer'
 import { fetchAllUsers,deleteMe } from '../controllers/userController.js';
 
 

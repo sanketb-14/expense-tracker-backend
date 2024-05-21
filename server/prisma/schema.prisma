@@ -24,6 +24,7 @@ model User {
   passwordResetToken String?
   passwordResetExpires DateTime?
   active Boolean @default(true)
+  premium Boolean @default(false)
  
 }
 

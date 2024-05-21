@@ -7,6 +7,9 @@ import { LiaUserEditSolid } from "react-icons/lia";
 import React, { useState } from "react";
 import { useAuth } from "../contexts/UsersContext";
 
+
+
+
 const initialState = {
   title: "",
   descriptions: "",
@@ -23,11 +26,14 @@ const TransactionTable = () => {
     deleteExpense,
     addExpense,
     editExpense,
+    generatePDF
   } = useTrans();
   const router = useRouter();
   const [expense, setExpense] = useState(initialState);
 
-  const { category } = useAuth();
+  const { category,user } = useAuth();
+ 
+ 
 
   async function handleDelete(id) {
     await deleteExpense(id);
@@ -37,6 +43,24 @@ const TransactionTable = () => {
   function handleChange(e) {
     const { name, value } = e.target;
     setExpense({ ...expense, [name]: value });
+  }
+  async function handlePdfClick(){
+    try {
+      const response = await generatePDF(transactions);
+     
+      const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.setAttribute('download', 'transactions.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      router.push('/dashboard')
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+    }
+
   }
 
   async function handleEditSubmit(e, transactionId) {
@@ -63,7 +87,10 @@ const TransactionTable = () => {
       <h1 className="text-3xl absolute top-0 m-2">
         Total Balance :{" "}
         <span className="font-bold text-secondary ">{balance} $</span>{" "}
-      </h1>
+      </h1>{
+        user.premium &&     <button className="btn absolute right-10" onClick={handlePdfClick}>Generate PDF</button>
+      }
+  
       <div className="collapse mt-20 w-[20rem] sm:w-[40rem]">
         <input type="checkbox" />
         <div className="collapse-title text-xs text-primary sm:text-sm btn btn-md">
