@@ -97,8 +97,8 @@ function Login() {
               />
               <label className="label  ">
                 <Link
-                  href="/forget-password"
-                  key="forgot-password"
+                  href="/forgotPassword"
+                  key="forgotPassword"
                   className="label-text-alt link link-hover hover:link-primary "
                 >
                   Forgot password?

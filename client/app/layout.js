@@ -9,6 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "Expense-tracker",
   description: "Best way to manage your expense",
+  favicon:('../public/assets/favicon-32x32.png')
 };
 
 export default function RootLayout({ children }) {

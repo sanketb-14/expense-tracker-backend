@@ -42,11 +42,19 @@ export const deleteMe = catchAsync(async (req,res,next)=>{
 });
 
 export const myAccount = catchAsync(async (req,res,next)=>{
+    const page = req.query.page * 1 || 1
+    const limit = req.query.limit * 1 || 10
+    const skip = (page - 1) * limit
     const myTransaction = await prisma.transaction.findMany({
+        skip,
+        take:limit,
         where:{
             userId:req.user.id
 
         },
+        orderBy:[
+            {createdAt:'desc'}
+        ],
         include: { categories:{select:{
             categories:true
         }
@@ -56,9 +64,7 @@ export const myAccount = catchAsync(async (req,res,next)=>{
     if(!myTransaction){
         return next(new AppError("No transaction found",404))
     }
-    // const balance = await prisma.transaction.findMany({
-        
-    // })
+    
     const balance = myTransaction.reduce((acc, item) =>{
         let updatedBalance = acc
         if(item.transactionType === 'debit'){
@@ -70,8 +76,10 @@ export const myAccount = catchAsync(async (req,res,next)=>{
         }
         return Number(updatedBalance.toFixed(2))
     },0)
+    const totalPages = Math.round(myTransaction.length/10) + 1
     return res.status(200).json({
         status:"success",
+        totalPages,
         balance,
         data:{
             myTransaction

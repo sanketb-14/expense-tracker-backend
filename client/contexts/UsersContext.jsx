@@ -236,6 +236,23 @@ function UsersProvider({ children }) {
     
   }
 
+  async function forgotPassword(email){
+    try{
+      dispatch({type:"isLoading"})
+      const res = await axios.post(`http://localhost:3000/api/v1/users/forgotPassword`,email)
+      console.log(res)
+      if (res.data.status === "success") {
+        alert(`Email has been sent to your email: ${res.data.data.user.email}`);
+      } else {
+        alert(`Failed to send reset email: ${res.data.message}`);
+      }
+      
+    }
+    catch(error){
+      dispatch({type:"rejected",payload:error})
+    }
+  }
+
   return (
     <UsersContext.Provider
       value={{
@@ -251,6 +268,7 @@ function UsersProvider({ children }) {
         category,
         balance,
         setPremium,
+        forgotPassword
         
       }}
     >

@@ -11,6 +11,7 @@ import { promisify } from "util";
 import { generateToken, comparePassword } from "../helper/userModelHelper.js";
 import sendEmail from "../helper/emailHelper.js";
 
+
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -172,6 +173,8 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
       email: req.body.email,
     },
   });
+
+  
   if (!user) {
     return next(new AppError("There is no user with this email address"));
   }

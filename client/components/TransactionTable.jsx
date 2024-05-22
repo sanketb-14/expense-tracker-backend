@@ -6,6 +6,7 @@ import { ImCross } from "react-icons/im";
 import { LiaUserEditSolid } from "react-icons/lia";
 import React, { useState } from "react";
 import { useAuth } from "../contexts/UsersContext";
+import Pagination from "./Pagination";
 
 
 
@@ -26,12 +27,18 @@ const TransactionTable = () => {
     deleteExpense,
     addExpense,
     editExpense,
-    generatePDF
+    generatePDF,
+    paginationData,fetchTransactions
   } = useTrans();
   const router = useRouter();
   const [expense, setExpense] = useState(initialState);
 
   const { category,user } = useAuth();
+  const { currentPage, totalPages, totalTransactions } = paginationData
+
+  const handlePageChange = (page) => {
+    fetchTransactions(page,10); // Fetch transactions for the new page
+  };
  
  
 
@@ -84,7 +91,7 @@ const TransactionTable = () => {
   if (isLoading) return <Loader />;
   return (
     <div className="overflow-x-auto h-screen">
-      <h1 className="text-3xl absolute top-0 m-2">
+      <h1 className="text-3xl absolute top-0 m-2 z-20 bg-base-200 w-1/2 p-2 rounded border-l-2 border-secondary">
         Total Balance :{" "}
         <span className="font-bold text-secondary ">{balance} $</span>{" "}
       </h1>{
@@ -105,7 +112,7 @@ const TransactionTable = () => {
         </div>
       </div>
       {transactions.length > 0 ? (
-        <table className="table">
+        <table className="table z-10">
           {/* head */}
           <thead>
             <tr>
@@ -280,6 +287,7 @@ const TransactionTable = () => {
       ) : (
         <h1 className="text-3xl mt-20">No Transaction Found...</h1>
       )}
+      <Pagination/>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useReducer, useEffect } from "react";
+import { createContext, useContext, useReducer, useEffect ,useCallback} from "react";
 import axiosInstance from "./helper/axiosInstance";
 import axios from "axios";
 import { useAuth } from "./UsersContext";
@@ -17,6 +17,11 @@ const initialState = {
     orderId: "",
     paymentId: "",
     signature: "",
+  },
+  paginationData: {
+    currentPage: 1,
+    totalPages: 1,
+    totalTransactions: 0,
   },
 };
 
@@ -51,22 +56,34 @@ function reducer(state, action) {
         order: action.payload,
         isLoading: false,
       };
+      case "setPaginationData":
+        return {
+         ...state,
+          paginationData: action.payload,
+          isLoading: false,
+        };
+    case "setPremium":
+
     default:
       return "unknown action type";
   }
 }
 
 function TransactionProvider({ children }) {
-  const [{ transactions, isLoading, balance, error }, dispatch] = useReducer(
+  const [{ transactions, isLoading, balance, error,paginationData }, dispatch] = useReducer(
     reducer,
     initialState
   );
   const { isLoggedIn, setPremium } = useAuth();
 
-  async function fetchTransactions() {
+  const fetchTransactions=useCallback(async(page=1)=> {
     try {
       dispatch({ type: "isLoading" });
-      const res = await axiosInstance.get("/api/v1/accounts/myAccount");
+      const res = await axiosInstance.get("/api/v1/accounts/myAccount",{
+        params:{
+          page,
+        }
+      });
 
       console.log(res);
 
@@ -75,19 +92,29 @@ function TransactionProvider({ children }) {
         payload: res.data.data.myTransaction,
       });
       dispatch({ type: "getBalance", payload: res.data.balance });
+      dispatch({
+        type: "setPaginationData",
+        payload: {
+          currentPage: page,
+          totalPages: res.data.totalPages, 
+          totalTransactions: res.data.myTransaction, 
+        },
+      });
+      
     } catch (err) {
-      dispatch({ type: "rejected", payload: err.response.data });
+      dispatch({ type: "rejected", payload: err.data });
     }
-  }
+
+  })
 
   useEffect(() => {
     const fetchData = async () => {
-      await fetchTransactions();
+      await fetchTransactions(1);
     };
     if (isLoggedIn) {
       fetchData();
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn])
 
   async function addExpense(expenseData) {
     try {
@@ -270,6 +297,8 @@ function TransactionProvider({ children }) {
     }
   }
 
+  
+
   return (
     <TransactionContext.Provider
       value={{
@@ -283,6 +312,7 @@ function TransactionProvider({ children }) {
         getTransactionsByCategories,
         razorCheckout,
         generatePDF,
+        paginationData,fetchTransactions
       }}
     >
       {children}
