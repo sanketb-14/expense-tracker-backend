@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "cd .. && cd client && npm run dev",
-    "start": "concurrently \"nodemon server.js\"  \"npm run dev\""
+    "allStart": "concurrently \"nodemon server.js\"  \"npm run dev\"",
+    "start":"node server.js"
+
   },
   "keywords": [],
   "author": "",
