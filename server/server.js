@@ -9,7 +9,6 @@ import xss from 'xss-clean'
 import cors from 'cors'
 import 'dotenv/config'
 import next from "next";
-import createServer from "http";
 
 const app = express();
 const nextApp = next({ dev: process.env.NODE_ENV !== "production" });
